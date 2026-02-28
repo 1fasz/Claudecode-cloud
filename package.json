@@ -1,0 +1,30 @@
+{
+  "name": "cslegaltech-phone-answering",
+  "version": "1.0.0",
+  "description": "AI-powered phone answering system for CSLegalTech and VulcanCloud with Office365 calendar scheduling",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "tunnel": "ngrok http 3000"
+  },
+  "dependencies": {
+    "@microsoft/microsoft-graph-client": "^3.0.7",
+    "@azure/msal-node": "^2.16.2",
+    "@anthropic-ai/sdk": "^0.36.3",
+    "express": "^4.18.2",
+    "twilio": "^5.3.7",
+    "dotenv": "^16.4.5",
+    "node-cache": "^5.1.2",
+    "winston": "^3.13.0",
+    "node-fetch": "^3.3.2",
+    "date-fns": "^3.6.0",
+    "date-fns-tz": "^3.1.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
