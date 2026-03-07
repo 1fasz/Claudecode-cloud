@@ -27,7 +27,7 @@ const { bookAppointment, checkAvailability, getAvailableSlots } = require("../se
 
 // Twilio request validation middleware
 function validateTwilioRequest(req, res, next) {
-  if (process.env.NODE_ENV === "development" && process.env.SKIP_TWILIO_VALIDATION === "true") {
+  if (process.env.SKIP_TWILIO_VALIDATION === "true") {
     return next();
   }
   const valid = twilio.validateRequest(
