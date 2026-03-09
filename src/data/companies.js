@@ -46,6 +46,8 @@ companies, C&S LegalTech bills hourly as services are provided — clients only 
       "Office 365 — setup, migration, and ongoing management for law firms",
       "Legal accounting — trust accounting, billing, and financial reporting",
       "Law firm practice management consulting and implementation",
+      "Hosted desktop solutions — access your Windows desktop from any device",
+      "Windows virtual server solutions — dedicated hosted servers for your firm",
       "Cloud services and migration — Private Cloud, hosted software",
       "Legal document management and cloud storage",
       "Managed services and remote support (hourly, not monthly blocks)",
@@ -76,33 +78,45 @@ companies, C&S LegalTech bills hourly as services are provided — clients only 
   vulcancloud: {
     name: "Vulcan Cloud",
     website: "https://vulcancloud.com",
-    tagline: "Hosted Virtual Desktops, Servers & Cloud Storage",
-    phone: null,
+    tagline: "Hosted Desktops, Virtual Servers & Cloud Solutions for Any Business",
+    phone: "(205) 289-1500",
     contactEmail: "info@vulcancloud.com",
     address: "Birmingham, Alabama, United States",
+    relationship: "Vulcan Cloud is the cloud services division of C&S LegalTech, expanding cloud solutions beyond law firms to businesses of all types and industries.",
     description: `Vulcan Cloud is a cloud services provider based in Birmingham, Alabama,
-offering hosted virtual desktops, hosted virtual servers, and cloud storage solutions.
-Vulcan Cloud helps organizations rapidly migrate their IT infrastructure to the cloud,
-enabling businesses to reduce on-premise hardware costs and work from anywhere.`,
+offering hosted Windows desktops, hosted virtual servers, cloud storage, and full IT
+infrastructure solutions for businesses of all sizes and industries. Vulcan Cloud is the
+cloud expansion of C&S LegalTech, bringing 25+ years of technology expertise to companies
+outside the legal sector. Whether you're a small business or a growing enterprise, Vulcan
+Cloud helps you eliminate on-premise hardware, reduce IT costs, and enable your team to
+work securely from anywhere.`,
     services: [
-      "Hosted virtual desktops (work from any device, anywhere)",
-      "Hosted virtual servers",
-      "Cloud storage solutions",
-      "Cloud migration services",
-      "IT infrastructure migration to the cloud",
+      "Hosted Windows desktops — your full Windows desktop accessible from any device",
+      "Windows virtual server solutions — dedicated hosted servers in the cloud",
+      "Cloud storage — secure, accessible file storage for your entire organization",
+      "Cloud migration — move your entire IT infrastructure to the cloud",
+      "Managed cloud services — ongoing monitoring, maintenance, and support",
+      "Office 365 — setup, migration, and management",
+      "Remote access solutions — work from anywhere, securely",
+      "Disaster recovery and cloud backup",
+      "IT consulting for businesses of all industries",
     ],
     keyDifferentiators: [
-      "Based in Birmingham, Alabama — local expertise",
-      "Rapid cloud migration for businesses of all sizes",
-      "Reduce on-premise hardware costs",
-      "Enable remote work from any device",
+      "Backed by C&S LegalTech — 25+ years of hands-on IT and cloud experience",
+      "Serving businesses of all types, not just law firms",
+      "Birmingham, Alabama based — local support with national reach",
+      "Eliminate costly on-premise hardware and server rooms",
+      "Your team works from any device, anywhere, with full Windows experience",
+      "Hourly support billing — pay only for what you use",
     ],
     businessHours: "Monday through Friday, 9:00 AM to 5:00 PM Central Time",
     appointmentTypes: [
       "Cloud migration assessment",
-      "Virtual desktop demo",
-      "Hosted server consultation",
+      "Hosted desktop demo",
+      "Virtual server consultation",
       "Cloud storage discussion",
+      "Office 365 migration planning",
+      "Managed services discussion",
       "General cloud inquiry",
     ],
   },
@@ -118,7 +132,10 @@ function buildCompanyContext() {
   return `
 === COMPANY INFORMATION ===
 
-You represent two related companies. When a caller asks about a specific company, focus on that one.
+You represent two related companies owned by the same team. C&S LegalTech focuses on law firms,
+while Vulcan Cloud is the cloud expansion serving businesses of all industries. Both share the same
+phone number and team. When a caller asks about a specific company, focus on that one. If a caller
+from Vulcan Cloud's website asks about cloud services for a non-legal business, answer as Vulcan Cloud.
 If it's unclear which company they're calling about, ask them.
 
 --- Company 1: ${cs.name} ---
@@ -145,9 +162,11 @@ Appointment types: ${cs.appointmentTypes.join(", ")}
 
 --- Company 2: ${vc.name} ---
 Website: ${vc.website}
+Phone: ${vc.phone}
 Email: ${vc.contactEmail}
 Location: ${vc.address}
 Tagline: ${vc.tagline}
+Relationship to C&S LegalTech: ${vc.relationship}
 
 About: ${vc.description.trim()}
 
