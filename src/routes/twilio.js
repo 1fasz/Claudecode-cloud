@@ -23,7 +23,7 @@ const {
   addToHistory,
 } = require("../utils/sessionStore");
 const { processCallerInput, extractSchedulingData, generateConfirmationMessage } = require("../services/claude");
-const { bookAppointment, checkAvailability, getAvailableSlots, sendStaffNotificationEmail } = require("../services/calendar");
+const { bookAppointment, checkAvailability, getAvailableSlots } = require("../services/calendar");
 
 // Map staff names to their calendar emails from env
 const STAFF_MEMBERS = [
@@ -504,17 +504,6 @@ router.post("/schedule/confirm", async (req, res) => {
     });
 
     logger.info("Appointment booked", { CallSid, eventId: result.eventId });
-
-    // Notify the staff member by email (non-blocking — don't fail the call if email fails)
-    if (appt.staffEmail && appt.staffName) {
-      sendStaffNotificationEmail({
-        toEmail: appt.staffEmail,
-        toName: appt.staffName,
-        appt: { ...appt, callerPhone: session.from },
-        displayTime: result.displayTime,
-        teamsLink: result.teamsLink,
-      }).catch((err) => logger.warn("Staff email notification failed", { error: err.message }));
-    }
 
     const confirmMsg = await generateConfirmationMessage(appt, company);
     deleteSession(CallSid);
