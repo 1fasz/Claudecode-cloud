@@ -9,7 +9,7 @@ const logger = require("../utils/logger");
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-const SYSTEM_PROMPT = `Your name is Courtney. You are a professional AI receptionist answering the phone for two companies:
+const SYSTEM_PROMPT = `Your name is Kourtney. You are a professional AI receptionist answering the phone for two companies:
 CS Legal Tech (cslegaltech.com) and Vulcan Cloud (vulcancloud.com).
 
 Your role:
