@@ -15,13 +15,13 @@ const COMPANIES = {
     founded: "1999",
     description: `C&S LegalTech Consulting Group LLC is a full-service technology and consulting
 company specializing in law firm practice management, accounting systems, and cloud services.
-Founded in 1999 by Pat, C&S LegalTech has worked with hundreds of law firms across the country.
+Founded in 1999 by Pat Cunningham, C&S LegalTech has worked with hundreds of law firms across the country.
 With over 30 years of combined experience in law firm administration, accounting, and network
 management, the team understands the demands of a busy law firm. Unlike most managed services
 companies, C&S LegalTech bills hourly as services are provided — clients only pay for what they use.`,
     team: [
       {
-        name: "Pat Cunninghame",
+        name: "Pat Cunningham",
         role: "Founder",
         extension: "1",
         bio: "Founded C&S LegalTech in 1999. Specializes in law firm accounting, technology, and software implementations.",
