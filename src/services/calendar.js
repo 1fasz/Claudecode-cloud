@@ -65,10 +65,10 @@ async function getGraphClient() {
  * @param {string} timeStr - "HH:MM" (24h, in business timezone)
  * @param {number} durationMinutes
  */
-async function checkAvailability(dateStr, timeStr, durationMinutes = null) {
+async function checkAvailability(dateStr, timeStr, durationMinutes = null, calendarEmail = null) {
   const duration = durationMinutes || parseInt(process.env.DEFAULT_APPOINTMENT_DURATION) || 30;
   const tz = process.env.TIMEZONE || "America/New_York";
-  const calendarEmail = process.env.CALENDAR_USER_EMAIL;
+  calendarEmail = calendarEmail || process.env.CALENDAR_USER_EMAIL;
 
   const startLocal = parseISO(`${dateStr}T${timeStr}:00`);
   const startUtc = fromZonedTime(startLocal, tz);
@@ -126,7 +126,7 @@ async function bookAppointment(appointmentData) {
 
   const duration = durationMinutes || parseInt(process.env.DEFAULT_APPOINTMENT_DURATION) || 30;
   const tz = process.env.TIMEZONE || "America/New_York";
-  const calendarEmail = process.env.CALENDAR_USER_EMAIL;
+  const calendarEmail = appointmentData.staffEmail || process.env.CALENDAR_USER_EMAIL;
 
   const startLocal = parseISO(`${date}T${time}:00`);
   const startUtc = fromZonedTime(startLocal, tz);
@@ -204,10 +204,10 @@ async function bookAppointment(appointmentData) {
  * Get available time slots for a given date.
  * Returns an array of available HH:MM strings.
  */
-async function getAvailableSlots(dateStr, durationMinutes = null) {
+async function getAvailableSlots(dateStr, durationMinutes = null, calendarEmail = null) {
   const duration = durationMinutes || parseInt(process.env.DEFAULT_APPOINTMENT_DURATION) || 30;
   const tz = process.env.TIMEZONE || "America/New_York";
-  const calendarEmail = process.env.CALENDAR_USER_EMAIL;
+  calendarEmail = calendarEmail || process.env.CALENDAR_USER_EMAIL;
 
   const startHour = parseInt((process.env.BUSINESS_HOURS_START || "09:00").split(":")[0]);
   const endHour = parseInt((process.env.BUSINESS_HOURS_END || "17:00").split(":")[0]);
@@ -253,4 +253,52 @@ async function getAvailableSlots(dateStr, durationMinutes = null) {
   }
 }
 
-module.exports = { bookAppointment, checkAvailability, getAvailableSlots };
+/**
+ * Send a booking notification email to the staff member via Microsoft Graph.
+ * Requires Mail.Send application permission on the Azure app.
+ *
+ * @param {Object} params
+ * @param {string} params.toEmail - Staff member's email
+ * @param {string} params.toName  - Staff member's name
+ * @param {Object} params.appt    - Appointment details
+ * @param {string} params.displayTime - Human-readable time string
+ * @param {string} params.teamsLink   - Teams meeting join URL (may be null)
+ */
+async function sendStaffNotificationEmail({ toEmail, toName, appt, displayTime, teamsLink }) {
+  const senderEmail = process.env.CALENDAR_USER_EMAIL;
+  const teamsSection = teamsLink
+    ? `<p><b>Teams Meeting:</b> <a href="${teamsLink}">${teamsLink}</a></p>`
+    : "";
+
+  const message = {
+    subject: `New Appointment: ${appt.appointmentType || "Consultation"} with ${appt.name}`,
+    body: {
+      contentType: "HTML",
+      content: `
+        <p>Hi ${toName},</p>
+        <p>Kourtney has booked a new appointment on your calendar:</p>
+        <table cellpadding="6" style="border-collapse:collapse;">
+          <tr><td><b>Client Name:</b></td><td>${appt.name}</td></tr>
+          <tr><td><b>Client Email:</b></td><td>${appt.email}</td></tr>
+          <tr><td><b>Client Phone:</b></td><td>${appt.callerPhone || "N/A"}</td></tr>
+          <tr><td><b>Appointment Type:</b></td><td>${appt.appointmentType || "Consultation"}</td></tr>
+          <tr><td><b>Date &amp; Time:</b></td><td>${displayTime}</td></tr>
+        </table>
+        ${teamsSection}
+        <p>This appointment was scheduled automatically via the Kourtney phone answering system.</p>
+      `,
+    },
+    toRecipients: [
+      { emailAddress: { address: toEmail, name: toName } },
+    ],
+  };
+
+  const graphClient = await getGraphClient();
+  await graphClient
+    .api(`/users/${senderEmail}/sendMail`)
+    .post({ message, saveToSentItems: false });
+
+  logger.info("Staff notification email sent", { to: toEmail, appt: appt.name });
+}
+
+module.exports = { bookAppointment, checkAvailability, getAvailableSlots, sendStaffNotificationEmail };

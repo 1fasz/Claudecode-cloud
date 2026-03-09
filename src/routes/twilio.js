@@ -23,7 +23,24 @@ const {
   addToHistory,
 } = require("../utils/sessionStore");
 const { processCallerInput, extractSchedulingData, generateConfirmationMessage } = require("../services/claude");
-const { bookAppointment, checkAvailability, getAvailableSlots } = require("../services/calendar");
+const { bookAppointment, checkAvailability, getAvailableSlots, sendStaffNotificationEmail } = require("../services/calendar");
+
+// Map staff names to their calendar emails from env
+const STAFF_MEMBERS = [
+  { name: "Pat Cunningham",  key: "pat",      email: () => process.env.STAFF_PAT_EMAIL },
+  { name: "Michelle Collier", key: "michelle", email: () => process.env.STAFF_MICHELLE_EMAIL },
+  { name: "Michael Stanley",  key: "michael",  email: () => process.env.STAFF_MICHAEL_EMAIL },
+];
+
+function resolveStaffEmail(speech) {
+  const s = (speech || "").toLowerCase();
+  for (const staff of STAFF_MEMBERS) {
+    if (s.includes(staff.key) || s.includes(staff.name.split(" ")[0].toLowerCase())) {
+      return { name: staff.name, email: staff.email() };
+    }
+  }
+  return null;
+}
 
 // Twilio request validation middleware
 function validateTwilioRequest(req, res, next) {
@@ -144,8 +161,8 @@ router.post("/process", async (req, res) => {
         updateSession(CallSid, { state: STATES.SCHEDULING_GET_NAME });
         return gatherSpeech(res, {
           say: aiResult.spoken,
-          action: `${baseUrl}/twilio/schedule/name`,
-          hints: "my name is, I am, it's",
+          action: `${baseUrl}/twilio/schedule/staff`,
+          hints: "Pat, Michelle, Michael, Pat Cunningham, Michelle Collier, Michael Stanley",
           timeout: 8,
         });
 
@@ -178,6 +195,42 @@ router.post("/process", async (req, res) => {
 // ============================================================
 // SCHEDULING FLOW
 // ============================================================
+
+/**
+ * POST /twilio/schedule/staff
+ * Ask who the caller wants to meet with.
+ */
+router.post("/schedule/staff", async (req, res) => {
+  const { CallSid, SpeechResult } = req.body;
+  const noInput = req.query.noInput === "true";
+  const baseUrl = process.env.PUBLIC_URL;
+
+  const session = getSession(CallSid);
+  if (!session) return sayAndHangup(res, "Session expired. Please call back.");
+
+  const speech = noInput ? "" : (SpeechResult || "").trim();
+
+  if (speech) {
+    const match = resolveStaffEmail(speech);
+    if (match) {
+      updateSession(CallSid, { pendingAppointment: { ...(session.pendingAppointment || {}), staffEmail: match.email, staffName: match.name } });
+      return gatherSpeech(res, {
+        say: `Great, I'll schedule you with ${match.name}. May I get your name please?`,
+        action: `${baseUrl}/twilio/schedule/name`,
+        hints: "my name is, I am, it's",
+        timeout: 8,
+      });
+    }
+  }
+
+  const names = STAFF_MEMBERS.map((s) => s.name.split(" ")[0]).join(", ");
+  gatherSpeech(res, {
+    say: `Who would you like to schedule an appointment with? We have ${names}.`,
+    action: `${baseUrl}/twilio/schedule/staff`,
+    hints: STAFF_MEMBERS.map((s) => s.name).join(", "),
+    timeout: 8,
+  });
+});
 
 /**
  * POST /twilio/schedule/name
@@ -269,7 +322,7 @@ router.post("/schedule/date", async (req, res) => {
     // Optionally mention available slots
     let availabilityHint = "";
     try {
-      const slots = await getAvailableSlots(collected.date);
+      const slots = await getAvailableSlots(collected.date, null, collected.staffEmail);
       if (slots.length > 0) {
         const readableSlots = slots.slice(0, 3).map((s) => {
           const [h, m] = s.split(":").map(Number);
@@ -321,7 +374,7 @@ router.post("/schedule/time", async (req, res) => {
     // Check availability before confirming
     let isAvailable = true;
     try {
-      isAvailable = await checkAvailability(collected.date, collected.time);
+      isAvailable = await checkAvailability(collected.date, collected.time, null, collected.staffEmail);
     } catch (err) {
       logger.warn("Availability check failed, proceeding", { error: err.message });
     }
@@ -446,9 +499,22 @@ router.post("/schedule/confirm", async (req, res) => {
       appointmentType: appt.appointmentType || "consultation",
       company,
       callerPhone: session.from,
+      staffEmail: appt.staffEmail,
+      staffName: appt.staffName,
     });
 
     logger.info("Appointment booked", { CallSid, eventId: result.eventId });
+
+    // Notify the staff member by email (non-blocking — don't fail the call if email fails)
+    if (appt.staffEmail && appt.staffName) {
+      sendStaffNotificationEmail({
+        toEmail: appt.staffEmail,
+        toName: appt.staffName,
+        appt: { ...appt, callerPhone: session.from },
+        displayTime: result.displayTime,
+        teamsLink: result.teamsLink,
+      }).catch((err) => logger.warn("Staff email notification failed", { error: err.message }));
+    }
 
     const confirmMsg = await generateConfirmationMessage(appt, company);
     deleteSession(CallSid);
