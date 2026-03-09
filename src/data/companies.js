@@ -21,19 +21,22 @@ management, the team understands the demands of a busy law firm. Unlike most man
 companies, C&S LegalTech bills hourly as services are provided — clients only pay for what they use.`,
     team: [
       {
-        name: "Pat",
+        name: "Pat Cunninghame",
         role: "Founder",
+        extension: "1",
         bio: "Founded C&S LegalTech in 1999. Specializes in law firm accounting, technology, and software implementations.",
-      },
-      {
-        name: "Michael Stanley",
-        role: "Network Technician & System Administrator",
-        bio: "Joined in 2009. Over 19 years of IT experience in law firms, healthcare, and banking. Skills include networking, troubleshooting, computer virtualization, and business administration.",
       },
       {
         name: "Michelle Collier",
         role: "Legal Technology Specialist",
+        extension: "2",
         bio: "10 years with C&S LegalTech. Over 30 years of experience in the legal field. Deep expertise in Clio, Clio AI, Time Matters, PCLaw, TABS, Practice Master, Office 365, and legal accounting.",
+      },
+      {
+        name: "Michael Stanley",
+        role: "Network Technician & System Administrator",
+        extension: "3",
+        bio: "Joined in 2009. Over 19 years of IT experience in law firms, healthcare, and banking. Skills include networking, troubleshooting, computer virtualization, and business administration.",
       },
     ],
     services: [
@@ -155,7 +158,7 @@ Why clients choose us:
 ${cs.keyDifferentiators.map((d) => `  - ${d}`).join("\n")}
 
 Team:
-${cs.team.map((t) => `  - ${t.name} (${t.role}): ${t.bio}`).join("\n")}
+${cs.team.map((t) => `  - ${t.name} (${t.role}, ext. ${t.extension}): ${t.bio}`).join("\n")}
 
 Business hours: ${cs.businessHours}
 Appointment types: ${cs.appointmentTypes.join(", ")}
