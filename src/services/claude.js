@@ -9,6 +9,20 @@ const logger = require("../utils/logger");
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+async function withRetry(fn, retries = 2) {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (i < retries && err.status === 503) {
+        await new Promise((r) => setTimeout(r, 1000 * (i + 1)));
+        continue;
+      }
+      throw err;
+    }
+  }
+}
+
 const SYSTEM_PROMPT = `Your name is Kourtney. You are a professional AI receptionist answering the phone for two companies:
 CS Legal Tech (cslegaltech.com) and Vulcan Cloud (vulcancloud.com).
 
@@ -101,7 +115,7 @@ async function processCallerInput(session, callerSpeech) {
   }));
 
   const chat = model.startChat({ history });
-  const result = await chat.sendMessage(callerSpeech || "[silence / unclear]");
+  const result = await withRetry(() => chat.sendMessage(callerSpeech || "[silence / unclear]"));
   const rawText = result.response.text();
 
   const { spoken, meta } = parseAIResponse(rawText);
@@ -140,7 +154,7 @@ If a time like "2 PM" or "afternoon" was mentioned, convert to 24h HH:MM format.
     systemInstruction: SCHEDULING_ASSISTANT_PROMPT,
   });
 
-  const result = await model.generateContent(context);
+  const result = await withRetry(() => model.generateContent(context));
   const rawText = result.response.text();
 
   const lines = rawText.trim().split("\n");
