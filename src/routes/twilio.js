@@ -65,14 +65,14 @@ router.use(validateTwilioRequest);
 /**
  * Helper: respond with TwiML that speaks text and gathers speech input.
  */
-function gatherSpeech(res, { say, action, hints = "", timeout = 5, bargeIn = true }) {
+function gatherSpeech(res, { say, action, hints = "", timeout = 10, bargeIn = true }) {
   const twiml = new VoiceResponse();
   const gather = twiml.gather({
     input: "speech",
     action,
     method: "POST",
     timeout,
-    speechTimeout: "auto",
+    speechTimeout: 3,
     language: "en-US",
     hints: hints || undefined,
     bargeIn,
