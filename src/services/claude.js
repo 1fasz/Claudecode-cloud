@@ -1,13 +1,13 @@
 /**
- * Claude AI Service
+ * Google Gemini AI Service
  * Handles all AI logic: intent detection, Q&A, and conversation flow.
  */
 
-const Anthropic = require("@anthropic-ai/sdk");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { buildCompanyContext } = require("../data/companies");
 const logger = require("../utils/logger");
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const SYSTEM_PROMPT = `Your name is Kourtney. You are a professional AI receptionist answering the phone for two companies:
 CS Legal Tech (cslegaltech.com) and Vulcan Cloud (vulcancloud.com).
@@ -83,28 +83,30 @@ function parseAIResponse(rawText) {
  * Main conversation handler: takes caller input and returns spoken response + intent.
  */
 async function processCallerInput(session, callerSpeech) {
-  const messages = [
-    ...session.history,
-    { role: "user", content: callerSpeech || "[silence / unclear]" },
-  ];
-
-  logger.info("Sending to Claude", {
+  logger.info("Sending to Gemini", {
     callSid: session.callSid,
     input: callerSpeech,
     historyLen: session.history.length,
   });
 
-  const response = await client.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 400,
-    system: SYSTEM_PROMPT,
-    messages,
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.0-flash",
+    systemInstruction: SYSTEM_PROMPT,
   });
 
-  const rawText = response.content[0]?.text || "";
+  // Convert history to Gemini format (role must be "user" or "model")
+  const history = session.history.map((m) => ({
+    role: m.role === "assistant" ? "model" : "user",
+    parts: [{ text: m.content }],
+  }));
+
+  const chat = model.startChat({ history });
+  const result = await chat.sendMessage(callerSpeech || "[silence / unclear]");
+  const rawText = result.response.text();
+
   const { spoken, meta } = parseAIResponse(rawText);
 
-  logger.info("Claude response", { callSid: session.callSid, spoken, meta });
+  logger.info("Gemini response", { callSid: session.callSid, spoken, meta });
 
   return {
     spoken: spoken || "I'm sorry, could you repeat that?",
@@ -133,14 +135,14 @@ If a date was mentioned like "next Tuesday" or "March 5th", convert to YYYY-MM-D
 If a time like "2 PM" or "afternoon" was mentioned, convert to 24h HH:MM format.
 `.trim();
 
-  const response = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 300,
-    system: SCHEDULING_ASSISTANT_PROMPT,
-    messages: [{ role: "user", content: context }],
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.0-flash",
+    systemInstruction: SCHEDULING_ASSISTANT_PROMPT,
   });
 
-  const rawText = response.content[0]?.text || "";
+  const result = await model.generateContent(context);
+  const rawText = result.response.text();
+
   const lines = rawText.trim().split("\n");
   let collected = { ...currentData };
   let spoken = "";
@@ -150,7 +152,6 @@ If a time like "2 PM" or "afternoon" was mentioned, convert to 24h HH:MM format.
     if (trimmed.startsWith('{"collected"')) {
       try {
         const parsed = JSON.parse(trimmed);
-        // Merge only non-null values
         for (const [k, v] of Object.entries(parsed.collected || {})) {
           if (v !== null && v !== undefined) collected[k] = v;
         }
@@ -179,13 +180,9 @@ Duration: ${process.env.DEFAULT_APPOINTMENT_DURATION || 30} minutes
 
 Keep it to 2 sentences. Confirm the details and say a confirmation will be sent to their email.`;
 
-  const response = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 150,
-    messages: [{ role: "user", content: prompt }],
-  });
-
-  return response.content[0]?.text?.trim() || "Your appointment has been booked. You'll receive a confirmation shortly.";
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const result = await model.generateContent(prompt);
+  return result.response.text()?.trim() || "Your appointment has been booked. You'll receive a confirmation shortly.";
 }
 
 module.exports = {
