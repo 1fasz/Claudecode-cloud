@@ -90,7 +90,7 @@ async function processCallerInput(session, callerSpeech) {
   });
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
+    model: "gemini-2.0-flash-lite",
     systemInstruction: SYSTEM_PROMPT,
   });
 
@@ -136,7 +136,7 @@ If a time like "2 PM" or "afternoon" was mentioned, convert to 24h HH:MM format.
 `.trim();
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
+    model: "gemini-2.0-flash-lite",
     systemInstruction: SCHEDULING_ASSISTANT_PROMPT,
   });
 
