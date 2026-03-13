@@ -61,7 +61,7 @@ function gatherSpeech(res, { say, action, hints = "", timeout = 10, bargeIn = tr
     timeout,
     speechTimeout: 3,
     language: "en-US",
-    enhanced: true,
+    speechModel: "phone_call",
     hints: hints || undefined,
     bargeIn,
   });
