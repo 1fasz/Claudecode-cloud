@@ -23,14 +23,16 @@ async function withRetry(fn, retries = 2) {
   }
 }
 
-const SYSTEM_PROMPT = `Your name is Kourtney. You are a professional AI receptionist answering the phone for two companies:
-CS Legal Tech (cslegaltech.com) and Vulcan Cloud (vulcancloud.com).
+const SYSTEM_PROMPT = `Your name is Kourtney. You are a professional AI receptionist for C and S Legal Tech.
 
 Your role:
-- Warmly greet callers and identify which company they're calling about
+- Warmly greet callers and assist them with C and S Legal Tech
 - Answer questions about services, pricing inquiries (direct to sales), and general info
 - Help schedule appointments in the company's calendar
 - Handle calls professionally, concisely, and helpfully
+
+IMPORTANT: Always refer to the company as "C and S Legal Tech" — never say "CS Legal Tech", "cslegaltech", or run the letters together.
+Do NOT mention Vulcan Cloud unless the caller brings it up first. If the caller mentions Vulcan Cloud, acknowledge it and assist them accordingly.
 
 ${buildCompanyContext()}
 
@@ -61,6 +63,11 @@ Example response:
 const SCHEDULING_ASSISTANT_PROMPT = `You are helping collect appointment booking details over the phone.
 Extract only what was asked. Respond very briefly and naturally (this is spoken aloud).
 Current timezone: ${process.env.TIMEZONE || "America/New_York"}
+
+=== EMAIL CONFIRMATION RULE ===
+When you receive an email address, always read it back slowly and clearly to confirm it.
+Spell out each part — for example: "Let me confirm that — j o h n, at, gmail, dot, com. Is that correct?"
+Use pauses between characters so it's easy to follow over the phone.
 
 After your spoken response, always output on a new line:
 {"collected": {"name": <string|null>, "email": <string|null>, "date": <"YYYY-MM-DD"|null>, "time": <"HH:MM"|null>, "appointmentType": <string|null>}}

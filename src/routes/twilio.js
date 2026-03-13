@@ -96,7 +96,7 @@ router.post("/incoming", async (req, res) => {
 
   const baseUrl = process.env.PUBLIC_URL;
   gatherSpeech(res, {
-    say: "Thank you for calling. You've reached CS Legal Tech and Vulcan Cloud. My name is Kourtney, how can I help you today?",
+    say: "Thank you for calling C and S Legal Tech. My name is Kourtney, how can I help you today?",
     action: `${baseUrl}/twilio/process`,
     hints: "schedule appointment, legal tech, cloud services, pricing, support",
     timeout: 6,
