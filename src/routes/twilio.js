@@ -512,10 +512,12 @@ function transferToHuman(res, session) {
   const staffNumbers = (process.env.STAFF_PHONE_NUMBERS || "").split(",").filter(Boolean);
   const transferTo = staffNumbers[0];
 
+  logger.info("Transferring call", { transferTo, callSid: session?.callSid });
+
   if (!transferTo) {
     return sayAndHangup(
       res,
-      "I'll have a team member reach out to you shortly. Thank you for calling!"
+      "I'm sorry, I wasn't able to connect you. Please call us back at 2 0 5, 2 8 9, 1 5 0 0 and someone will be happy to help you."
     );
   }
 
@@ -546,7 +548,7 @@ router.post("/dial-complete", (req, res) => {
   if (DialCallStatus !== "completed" && DialCallStatus !== "answered") {
     return sayAndHangup(
       res,
-      "I'm sorry, no one is available right now. Please leave us a message at our website, cslegaltech.com, or try again during business hours. Thank you!"
+      "I'm sorry, no one is available to take your call right now. Please try us again at 2 0 5, 2 8 9, 1 5 0 0 during business hours, Monday through Friday 9 to 5. Thank you for calling C&S LegalTech!"
     );
   }
 
