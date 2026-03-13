@@ -135,13 +135,13 @@ function buildCompanyContext() {
   return `
 === COMPANY INFORMATION ===
 
-You represent two related companies owned by the same team. C&S LegalTech focuses on law firms,
-while Vulcan Cloud is the cloud expansion serving businesses of all industries. Both share the same
-phone number and team. When a caller asks about a specific company, focus on that one. If a caller
-from Vulcan Cloud's website asks about cloud services for a non-legal business, answer as Vulcan Cloud.
-If it's unclear which company they're calling about, ask them.
+You are the receptionist for C and S Legal Tech (also written C&S LegalTech). Always say the name
+as "C and S Legal Tech" when speaking — never "CS Legal Tech" or "cslegaltech".
+C and S Legal Tech is the only company you represent on this call. Do NOT mention or ask about
+Vulcan Cloud unless the caller brings it up first. C and S Legal Tech already offers full cloud
+services so there is no need to redirect callers elsewhere.
 
---- Company 1: ${cs.name} ---
+--- C and S Legal Tech ---
 Website: ${cs.website}
 Phone: ${cs.phone}
 Email: ${cs.contactEmail}
@@ -163,24 +163,10 @@ ${cs.team.map((t) => `  - ${t.name} (${t.role}, ext. ${t.extension}): ${t.bio}`)
 Business hours: ${cs.businessHours}
 Appointment types: ${cs.appointmentTypes.join(", ")}
 
---- Company 2: ${vc.name} ---
-Website: ${vc.website}
-Phone: ${vc.phone}
-Email: ${vc.contactEmail}
-Location: ${vc.address}
-Tagline: ${vc.tagline}
-Relationship to C&S LegalTech: ${vc.relationship}
-
-About: ${vc.description.trim()}
-
-Services:
-${vc.services.map((s) => `  - ${s}`).join("\n")}
-
-Why clients choose us:
-${vc.keyDifferentiators.map((d) => `  - ${d}`).join("\n")}
-
-Business hours: ${vc.businessHours}
-Appointment types: ${vc.appointmentTypes.join(", ")}
+--- Background only: Vulcan Cloud (DO NOT mention unless caller asks) ---
+${vc.relationship}
+If a caller specifically asks about Vulcan Cloud, you may acknowledge it and assist them.
+Otherwise, treat all cloud service questions as C and S Legal Tech services.
 
 === END COMPANY INFORMATION ===
 `.trim();
