@@ -27,9 +27,9 @@ const { bookAppointment, checkAvailability, getAvailableSlots } = require("../se
 
 // Map staff names to their calendar emails from env
 const STAFF_MEMBERS = [
-  { name: "Pat Cunningham",  key: "pat",      email: () => process.env.STAFF_PAT_EMAIL },
-  { name: "Michelle Collier", key: "michelle", email: () => process.env.STAFF_MICHELLE_EMAIL },
+  { name: "Pat Cunningham",   key: "pat",      email: () => process.env.STAFF_PAT_EMAIL },
   { name: "Michael Stanley",  key: "michael",  email: () => process.env.STAFF_MICHAEL_EMAIL },
+  { name: "Michelle Collier", key: "michelle", email: () => process.env.STAFF_MICHELLE_EMAIL },
 ];
 
 function resolveStaffEmail(speech) {
@@ -210,7 +210,7 @@ router.post("/schedule/staff", async (req, res) => {
     }
   }
 
-  const names = STAFF_MEMBERS.map((s) => s.name.split(" ")[0]).join(", ");
+  const names = STAFF_MEMBERS.map((s) => s.name).join(", ");
   gatherSpeech(res, {
     say: `Who would you like to schedule an appointment with? We have ${names}.`,
     action: `${baseUrl}/twilio/schedule/staff`,
