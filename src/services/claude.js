@@ -111,7 +111,7 @@ async function processCallerInput(session, callerSpeech) {
   });
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-3.1-flash-lite-preview",
+    model: "gemini-2.5-flash-lite",
     systemInstruction: SYSTEM_PROMPT,
   });
 
@@ -157,7 +157,7 @@ If a time like "2 PM" or "afternoon" was mentioned, convert to 24h HH:MM format.
 `.trim();
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-3.1-flash-lite-preview",
+    model: "gemini-2.5-flash-lite",
     systemInstruction: SCHEDULING_ASSISTANT_PROMPT,
   });
 
@@ -201,7 +201,7 @@ Duration: ${process.env.DEFAULT_APPOINTMENT_DURATION || 30} minutes
 
 Keep it to 2 sentences. Confirm the details and say a confirmation will be sent to their email.`;
 
-  const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
   const result = await model.generateContent(prompt);
   return result.response.text()?.trim() || "Your appointment has been booked. You'll receive a confirmation shortly.";
 }
